@@ -1,0 +1,22 @@
+name: LifeSeries
+version: '${version}'
+
+main: org.b0basaurea.life.LifeSeries
+api-version: '26.2'
+load: POSTWORLD
+
+commands:
+  lives:
+    description: Check your lives
+  setLives:
+    description: Set a player's lives
+  addLives:
+    description: Add a life to a player
+  removeLives:
+    description: Remove a life from a player
+  gift:
+    description: Give your friend a life
+  session:
+    description: Controls Life Series sessions
+
+authors: [ B0basaurEA ]

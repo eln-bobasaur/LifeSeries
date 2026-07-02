@@ -1,0 +1,78 @@
+package org.b0basaurea.life.Managers;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.title.Title;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
+
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.UUID;
+
+public class KillManager implements Listener {
+
+    public BoogeymanManager boogey;
+    private LivesManager livesManager;
+    private ScoreboardManager scoreboardManager;
+
+    private HashMap<UUID, Integer> kills = new HashMap<>();
+
+    public KillManager(BoogeymanManager boogey, LivesManager livesManager, ScoreboardManager scoreboardManager)
+    {
+        this.boogey = boogey;
+        this.livesManager = livesManager;
+        this.scoreboardManager = scoreboardManager;
+
+        for(Player player : Bukkit.getOnlinePlayers())
+        {
+            kills.put(player.getUniqueId(), 0);
+        }
+    }
+
+    @EventHandler
+    public void onDeath(PlayerDeathEvent event)
+    {
+        Player killer = event.getPlayer().getKiller();
+
+        if(killer == null)
+            return;
+
+        if(killer == boogey.getBoogeyman())
+        {
+            boogey.setBoogeyman(null);
+
+            Title title = Title.title(
+                    Component.text("You are cured!", NamedTextColor.GREEN),
+                    Component.empty(),
+                    Title.Times.times(
+                            Duration.ofMillis(500),
+                            Duration.ofSeconds(2),
+                            Duration.ofMillis(500)
+                    )
+            );
+
+            killer.showTitle(title);
+        }
+
+        if(livesManager.getLives(killer) <= 1) //If red name, allow them to gain one life back after 2 kills. Resets every session
+        {
+            if(kills.get(killer.getUniqueId()) >= 2)
+            {
+                livesManager.addLives(killer, 1);
+                scoreboardManager.updatePlayerTeam(killer, livesManager.getLives(killer));
+                kills.put(killer.getUniqueId(), 0);
+            }
+
+            kills.put(killer.getUniqueId(), kills.get(killer.getUniqueId()) + 1);
+        }
+    }
+
+    public void addToKills(Player player)
+    {
+        kills.put(player.getUniqueId(), 0);
+    }
+}
