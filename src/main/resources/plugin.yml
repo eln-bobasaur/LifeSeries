@@ -14,8 +14,8 @@ commands:
     description: Add a life to a player
   removeLives:
     description: Remove a life from a player
-  gift:
-    description: Give your friend a life
+  givelife:
+    description: Give your friend your life
   session:
     description: Controls Life Series sessions
 

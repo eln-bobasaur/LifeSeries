@@ -17,6 +17,7 @@ public class KillManager implements Listener {
 
     public BoogeymanManager boogey;
     private LivesManager livesManager;
+//    private IndirectKillManager indirectKillManager;
     private ScoreboardManager scoreboardManager;
 
     private HashMap<UUID, Integer> kills = new HashMap<>();
@@ -26,6 +27,7 @@ public class KillManager implements Listener {
         this.boogey = boogey;
         this.livesManager = livesManager;
         this.scoreboardManager = scoreboardManager;
+//        this.indirectKillManager = indirectKillManager;
 
         for(Player player : Bukkit.getOnlinePlayers())
         {
@@ -38,10 +40,12 @@ public class KillManager implements Listener {
     {
         Player killer = event.getPlayer().getKiller();
 
-        if(killer == null)
-            return;
+//        if (killer == null) {
+//            killer = indirectKillManager.getIndirectKiller(event.getPlayer());
+//        }
 
-        if(killer == boogey.getBoogeyman())
+
+        if(killer == boogey.getBoogeyman() && killer != event.getPlayer())
         {
             boogey.setBoogeyman(null);
 
@@ -58,8 +62,9 @@ public class KillManager implements Listener {
             killer.showTitle(title);
         }
 
-        if(livesManager.getLives(killer) <= 1) //If red name, allow them to gain one life back after 2 kills. Resets every session
+        if(livesManager.getLives(killer) <= 1 && livesManager.getLives(event.getPlayer()) >= 2) //If red name, allow them to gain one life back after 2 kills. Resets every session
         {
+            killer.sendMessage("Take " + (2 - kills.get(killer.getUniqueId())) + " lives and you'll get a life back...");
             if(kills.get(killer.getUniqueId()) >= 2)
             {
                 livesManager.addLives(killer, 1);
@@ -71,8 +76,8 @@ public class KillManager implements Listener {
         }
     }
 
-    public void addToKills(Player player)
+    public void addToKill(Player p)
     {
-        kills.put(player.getUniqueId(), 0);
+        kills.put(p.getUniqueId(), 0);
     }
 }

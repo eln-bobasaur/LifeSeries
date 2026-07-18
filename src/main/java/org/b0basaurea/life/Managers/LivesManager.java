@@ -49,7 +49,7 @@ public class LivesManager {
         UUID uuid = player.getUniqueId();
 
         return players.computeIfAbsent(uuid, id -> {
-            int lives = config.getInt("players." + id + ".lives", 3);
+            int lives = config.getInt("players." + id + ".lives", 4);
             return new LifePlayer(id, lives);
         });
     }
@@ -58,14 +58,14 @@ public class LivesManager {
         LifePlayer lifePlayer = getLifePlayer(player);
         lifePlayer.addLives(amount);
         savePlayer(lifePlayer);
-        manager.updatePlayerTeam(player, amount);
+        manager.updatePlayerTeam(player, lifePlayer.getLives());
     }
 
     public void removeLives(Player player, int amount) {
         LifePlayer lifePlayer = getLifePlayer(player);
         lifePlayer.removeLives(amount);
         savePlayer(lifePlayer);
-        manager.updatePlayerTeam(player, amount);
+        manager.updatePlayerTeam(player, lifePlayer.getLives());
     }
 
     public void setLives(Player player, int amount) {
@@ -101,7 +101,7 @@ public class LivesManager {
 
         for (String uuidString : config.getConfigurationSection("players").getKeys(false)) {
             UUID uuid = UUID.fromString(uuidString);
-            int lives = config.getInt("players." + uuidString + ".lives", 3);
+            int lives = config.getInt("players." + uuidString + ".lives", 4);
 
             players.put(uuid, new LifePlayer(uuid, lives));
         }

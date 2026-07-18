@@ -35,9 +35,11 @@ public class SessionCommands implements CommandExecutor, TabCompleter {
         {
             sender.sendMessage("Usage:");
             sender.sendMessage("/session start");
-            sender.sendMessage("/session stop");
+            sender.sendMessage("/session stop(or end)");
             sender.sendMessage("/session boogey start");
             sender.sendMessage("/session boogey end");
+            sender.sendMessage("/session boogey done");
+            sender.sendMessage("/session boogey clean");
             return true;
         }
 
@@ -70,6 +72,11 @@ public class SessionCommands implements CommandExecutor, TabCompleter {
                         sender.sendMessage("Boogeyman ended.");
                     }
 
+                    case "done" -> {
+                        boogeymanManager.boogeyDone();
+                        sender.sendMessage("Boogeyman done.");
+                    }
+
                     case "clear" -> {
                         boogeymanManager.clearBoogeyman();
                         sender.sendMessage("Boogeyman cleared");
@@ -82,7 +89,7 @@ public class SessionCommands implements CommandExecutor, TabCompleter {
             default -> sender.sendMessage("Unknown subcommand. Use /session start, stop, or boogey.");
         }
 
-        return false;
+        return true;
     }
 
     @Override
@@ -92,7 +99,7 @@ public class SessionCommands implements CommandExecutor, TabCompleter {
 
         if(args.length == 1)
         {
-            return filter(List.of("start", "stop", "boogey"), args[0]);
+            return filter(List.of("start", "stop", "end", "boogey"), args[0]);
         }
 
         if(args.length == 2 && args[0].equalsIgnoreCase("boogey"))

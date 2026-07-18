@@ -10,6 +10,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -68,8 +70,8 @@ public class BoogeymanManager  {
         }, 4 * MINUTES + 45 * SECONDS);
 
         // 4:57, 4:58, 4:59 - countdown
-        Bukkit.getScheduler().runTaskLater(plugin, () -> showCountdown(3), 4 * MINUTES + 57 * SECONDS);
-        Bukkit.getScheduler().runTaskLater(plugin, () -> showCountdown(2), 4 * MINUTES + 58 * SECONDS);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> showCountdown(3), 4 * MINUTES + 55 * SECONDS);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> showCountdown(2), 4 * MINUTES + 57 * SECONDS);
         Bukkit.getScheduler().runTaskLater(plugin, () -> showCountdown(1), 4 * MINUTES + 59 * SECONDS);
 
         // 5:00 - reveal
@@ -118,7 +120,7 @@ public class BoogeymanManager  {
                 Component.empty(),
                 Title.Times.times(
                         Duration.ofMillis(250),
-                        Duration.ofSeconds(1),
+                        Duration.ofSeconds(2),
                         Duration.ofMillis(250)
                 )
         );
@@ -127,6 +129,29 @@ public class BoogeymanManager  {
             player.showTitle(title);
             player.playSound(player.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE, 1.0f, 1.0f);
         }
+    }
+
+    public void boogeyDone()
+    {
+        if(boogeyman == null)
+        {
+            Bukkit.broadcast(Component.text("There is no active boogeyman.", NamedTextColor.RED));
+            return;
+        }
+
+        Title title = Title.title(
+                Component.text("You are cured!", NamedTextColor.GREEN),
+                Component.empty(),
+                Title.Times.times(
+                        Duration.ofMillis(500),
+                        Duration.ofSeconds(2),
+                        Duration.ofMillis(500)
+                )
+        );
+
+        boogeyman.showTitle(title);
+
+        boogeyman = null;
     }
 
     private void chooseAndRevealBoogeyman() {
@@ -154,7 +179,7 @@ public class BoogeymanManager  {
         );
 
         Title notBoogeyTitle = Title.title(
-                Component.text("NOT the Boogeyman", NamedTextColor.GREEN),
+                Component.text("NOT THE BOOGEYMAN", NamedTextColor.GREEN),
                 Component.empty(),
                 Title.Times.times(
                         Duration.ofMillis(1000),
@@ -164,7 +189,7 @@ public class BoogeymanManager  {
         );
 
         Title boogeyTitle = Title.title(
-                Component.text("the boogeyman", NamedTextColor.DARK_RED),
+                Component.text("THE BOOGEYMAN", NamedTextColor.DARK_RED),
                 Component.empty(),
                 Title.Times.times(
                         Duration.ofMillis(1000),
