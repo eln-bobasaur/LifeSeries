@@ -50,53 +50,53 @@ public class LivesCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if(command.getName().equalsIgnoreCase("gift"))
-        {
-            if(!(sender instanceof Player player))
-                return false;
-
-            if(target.equals(player)) {
-                sender.sendMessage("You can't gift yourself a life, silly.");
-                return false;
-            }
-
-            if(livesManager.getLives(target) >= 4)
-            {
-                sender.sendMessage(target.displayName() + " already has max lives.");
-                return false;
-            }
-
-            if (livesManager.getLives(player) <= 1) {
-                player.sendMessage(
-                        Component.text(
-                                "You cannot give away your final life.",
-                                NamedTextColor.RED
-                        )
+        if (command.getName().equalsIgnoreCase("gift")) {
+            if (!(sender instanceof Player player)) {
+                sender.sendMessage(
+                        ChatColor.RED + "Only players can give lives."
                 );
                 return true;
             }
 
+            if (target.equals(player)) {
+                player.sendMessage(
+                        ChatColor.RED + "You cannot give yourself a life."
+                );
+                return true;
+            }
+
+            if (livesManager.getLives(player) <= 1) {
+                player.sendMessage(
+                        ChatColor.RED + "You cannot give away your final life."
+                );
+                return true;
+            }
+
+            if (livesManager.getLives(target) >= 4) {
+                player.sendMessage(
+                        ChatColor.RED
+                                + target.getName()
+                                + " already has the maximum number of lives."
+                );
+                return true;
+            }
+
+            livesManager.removeLives(player, 1);
             livesManager.addLives(target, 1);
-            livesManager.removeLives((Player) sender, 1);
-            scoreboardManager.updatePlayerTeam(target, livesManager.getLives(target));
 
-            player.playEffect(EntityEffect.PROTECTED_FROM_DEATH);
+            player.sendMessage(
+                    ChatColor.GREEN
+                            + "You gave "
+                            + target.getName()
+                            + " one of your lives."
+            );
 
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                player.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, player.getLocation().add(0, 1.2, 0), 30, 0.6, 0.9, 0.6, 0.05);
-            }, 20L);
+            target.sendMessage(
+                    ChatColor.GREEN
+                            + player.getName()
+                            + " gave you a life!"
+            );
 
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                target.playEffect(EntityEffect.PROTECTED_FROM_DEATH);
-                target.playSound(target.getLocation(), Sound.ITEM_TOTEM_USE, 0.8f, 1.0f);
-            }, 40L);
-
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                target.getWorld().spawnParticle(Particle.HAPPY_VILLAGER, target.getLocation().add(0, 1.2, 0), 60, 0.6, 0.9, 0.6, 0.05);
-            }, 50L);
-
-            sender.sendMessage(ChatColor.GREEN + "You gave " + target.getName() + " a life.");
-            target.sendMessage(ChatColor.GREEN + "You were given a life!");
             return true;
         }
 
@@ -106,6 +106,13 @@ public class LivesCommand implements CommandExecutor, TabCompleter {
         }
 
         int amount = 1;
+
+        if (amount < 0) {
+            sender.sendMessage(
+                    ChatColor.RED + "Amount cannot be negative."
+            );
+            return true;
+        }
 
         if (args.length >= 2) {
             try {
@@ -172,13 +179,15 @@ public class LivesCommand implements CommandExecutor, TabCompleter {
 
         // Second argument: amount
         if (args.length == 2) {
-
-            if (command.getName().equalsIgnoreCase("setLives")) {
-                return filter(List.of("0", "1", "2", "3", "4"), args[1]);
+            if (command.getName().equalsIgnoreCase("setlives")) {
+                return filter(
+                        List.of("0", "1", "2", "3", "4"),
+                        args[1]
+                );
             }
 
-            if (command.getName().equalsIgnoreCase("addLives")
-                    || command.getName().equalsIgnoreCase("removeLives")) {
+            if (command.getName().equalsIgnoreCase("addlives")
+                    || command.getName().equalsIgnoreCase("removelives")) {
                 return filter(List.of("1", "2", "3", "4"), args[1]);
             }
         }

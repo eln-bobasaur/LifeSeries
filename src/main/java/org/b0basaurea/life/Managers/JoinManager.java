@@ -34,7 +34,7 @@ public class JoinManager implements Listener {
         {
             player.setGameMode(GameMode.SPECTATOR);
         } else if(lives == 1) {
-            killManager.addToKill(player);
+            killManager.addPlayer(player);
         } else {
             player.setGameMode(GameMode.SURVIVAL);
         }

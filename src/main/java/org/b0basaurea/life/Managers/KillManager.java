@@ -3,7 +3,6 @@ package org.b0basaurea.life.Managers;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.title.Title;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,93 +10,106 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class KillManager implements Listener {
 
-    public BoogeymanManager boogey;
-    private LivesManager livesManager;
-//    private IndirectKillManager indirectKillManager;
-    private ScoreboardManager scoreboardManager;
+    private final BoogeymanManager boogeymanManager;
+    private final LivesManager livesManager;
 
-    private HashMap<UUID, Integer> kills = new HashMap<>();
+    private final Map<UUID, Integer> redLifeKills = new HashMap<>();
 
-    public KillManager(BoogeymanManager boogey, LivesManager livesManager, ScoreboardManager scoreboardManager)
-    {
-        this.boogey = boogey;
+    public KillManager(
+            BoogeymanManager boogeymanManager,
+            LivesManager livesManager
+    ) {
+        this.boogeymanManager = boogeymanManager;
         this.livesManager = livesManager;
-        this.scoreboardManager = scoreboardManager;
-//        this.indirectKillManager = indirectKillManager;
-
-        for(Player player : Bukkit.getOnlinePlayers())
-        {
-            kills.put(player.getUniqueId(), 0);
-        }
     }
 
     @EventHandler
-    public void onDeath(PlayerDeathEvent event)
-    {
-        Player killer = event.getPlayer().getKiller();
+    public void onDeath(PlayerDeathEvent event) {
         Player victim = event.getPlayer();
+        Player killer = victim.getKiller();
 
         if (killer == null || killer.equals(victim)) {
             return;
         }
 
-//        if (killer == null) {
-//            killer = indirectKillManager.getIndirectKiller(event.getPlayer());
-//        }
+        handleBoogeymanKill(killer);
+        handleRedLifeKill(killer, victim);
+    }
 
+    private void handleBoogeymanKill(Player killer) {
+        if (!killer.equals(boogeymanManager.getBoogeyman())) {
+            return;
+        }
 
-        if(killer == boogey.getBoogeyman() && killer != event.getPlayer())
-        {
-            boogey.setBoogeyman(null);
+        boogeymanManager.cureBoogeyman();
 
-            Title title = Title.title(
-                    Component.text("You are cured!", NamedTextColor.GREEN),
-                    Component.empty(),
-                    Title.Times.times(
-                            Duration.ofMillis(500),
-                            Duration.ofSeconds(2),
-                            Duration.ofMillis(500)
+        Title title = Title.title(
+                Component.text(
+                        "You are cured!",
+                        NamedTextColor.GREEN
+                ),
+                Component.empty(),
+                Title.Times.times(
+                        Duration.ofMillis(500),
+                        Duration.ofSeconds(2),
+                        Duration.ofMillis(500)
+                )
+        );
+
+        killer.showTitle(title);
+    }
+
+    private void handleRedLifeKill(
+            Player killer,
+            Player victim
+    ) {
+        if (livesManager.getLives(killer) != 1) {
+            return;
+        }
+
+        if (livesManager.getLives(victim) < 2) {
+            return;
+        }
+
+        UUID killerId = killer.getUniqueId();
+
+        int newKillCount =
+                redLifeKills.getOrDefault(killerId, 0) + 1;
+
+        if (newKillCount >= 2) {
+            livesManager.addLives(killer, 1);
+            redLifeKills.remove(killerId);
+
+            killer.sendMessage(
+                    Component.text(
+                            "You earned a life back!",
+                            NamedTextColor.GREEN
                     )
             );
 
-            killer.showTitle(title);
+            return;
         }
 
-        if(livesManager.getLives(killer) <= 1 && livesManager.getLives(event.getPlayer()) >= 2) //If red name, allow them to gain one life back after 2 kills. Resets every session
-        {
-            killer.sendMessage("Take " + (2 - kills.get(killer.getUniqueId())) + " lives and you'll get a life back...");
+        redLifeKills.put(killerId, newKillCount);
 
-            UUID killerId = killer.getUniqueId();
-            int newKills = kills.getOrDefault(killerId, 0) + 1;
-            kills.put(killerId, newKills);
-
-            if (newKills >= 2) {
-                livesManager.addLives(killer, 1);
-                kills.put(killerId, 0);
-
-                killer.sendMessage(
-                        Component.text(
-                                "You earned a life back!",
-                                NamedTextColor.GREEN
-                        )
-                );
-            } else {
-                killer.sendMessage(
-                        Component.text(
-                                "Get 1 more qualifying kill to regain a life.",
-                                NamedTextColor.RED
-                        )
-                );
-            }
-        }
+        killer.sendMessage(
+                Component.text(
+                        "Get 1 more qualifying kill to regain a life.",
+                        NamedTextColor.RED
+                )
+        );
     }
 
-    public void addToKill(Player p)
-    {
-        kills.put(p.getUniqueId(), 0);
+    public void addPlayer(Player player) {
+        redLifeKills.putIfAbsent(player.getUniqueId(), 0);
+    }
+
+    public void resetSessionKills() {
+        redLifeKills.clear();
     }
 }

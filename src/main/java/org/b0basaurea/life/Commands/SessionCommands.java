@@ -46,12 +46,20 @@ public class SessionCommands implements CommandExecutor, TabCompleter {
         switch (args[0].toLowerCase())
         {
             case "start" -> {
-                sessionManager.startSession();
+                if (!sessionManager.startSession()) {
+                    sender.sendMessage("A session is already active.");
+                    return true;
+                }
+
                 sender.sendMessage("Session started.");
             }
 
             case "stop", "end" -> {
-                sessionManager.stopSession();
+                if (!sessionManager.stopSession()) {
+                    sender.sendMessage("There is no active session.");
+                    return true;
+                }
+
                 sender.sendMessage("Session stopped.");
             }
 
@@ -78,7 +86,7 @@ public class SessionCommands implements CommandExecutor, TabCompleter {
                     }
 
                     case "clear" -> {
-                        boogeymanManager.clearBoogeyman();
+                        boogeymanManager.cureBoogeyman();
                         sender.sendMessage("Boogeyman cleared");
                     }
 

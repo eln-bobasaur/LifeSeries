@@ -4,12 +4,15 @@ import java.util.UUID;
 
 public class LifePlayer {
 
+    public static final int MIN_LIVES = 0;
+    public static final int MAX_LIVES = 4;
+
     private final UUID uuid;
     private int lives;
 
     public LifePlayer(UUID uuid, int lives) {
         this.uuid = uuid;
-        this.lives = lives;
+        setLives(lives);
     }
 
     public UUID getUuid() {
@@ -21,15 +24,18 @@ public class LifePlayer {
     }
 
     public void setLives(int lives) {
-        this.lives = Math.max(lives, 0);
+        this.lives = Math.max(
+                MIN_LIVES,
+                Math.min(MAX_LIVES, lives)
+        );
     }
 
     public void addLives(int amount) {
-        this.lives += amount;
+        setLives(lives + amount);
     }
 
     public void removeLives(int amount) {
-        this.lives = Math.max(this.lives - amount, 0);
+        setLives(lives - amount);
     }
 
     public boolean isOut() {

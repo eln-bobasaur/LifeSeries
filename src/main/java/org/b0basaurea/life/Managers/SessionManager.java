@@ -6,27 +6,65 @@ import org.bukkit.Bukkit;
 
 public class SessionManager {
 
-    private boolean sessionActive = false;
+    private final KillManager killManager;
+    private final BoogeymanManager boogeymanManager;
+    private final LivesManager livesManager;
 
-    public void startSession() {
-        if(sessionActive)
-            return;
+    private boolean sessionActive;
+
+    public SessionManager(
+            KillManager killManager,
+            BoogeymanManager boogeymanManager,
+            LivesManager livesManager
+    ) {
+        this.killManager = killManager;
+        this.boogeymanManager = boogeymanManager;
+        this.livesManager = livesManager;
+    }
+
+    public boolean startSession() {
+        if (sessionActive) {
+            return false;
+        }
 
         sessionActive = true;
 
+        killManager.resetSessionKills();
+        //boogeymanManager.startBoogeymanCountdown();
+
         Bukkit.broadcast(
-                Component.text("The session has started!", NamedTextColor.GREEN));
+                Component.text(
+                        "The session has started!",
+                        NamedTextColor.GREEN
+                )
+        );
+
+        return true;
     }
 
-    public void stopSession()
-    {
-        if(!sessionActive)
-            return;
+    public boolean stopSession() {
+        if (!sessionActive) {
+            return false;
+        }
 
         sessionActive = false;
 
+        if (boogeymanManager.hasActiveBoogeyman()) {
+            boogeymanManager.endBoogeyman();
+        } else {
+            boogeymanManager.cureBoogeyman();
+        }
+
+        livesManager.saveAllPlayers();
+
         Bukkit.broadcast(
-                Component.text("The session has ended!", NamedTextColor.RED));
+                Component.text(
+                        "The session has ended!",
+                        NamedTextColor.RED
+                )
+        );
+
+        return true;
     }
 
     public boolean isSessionActive() {

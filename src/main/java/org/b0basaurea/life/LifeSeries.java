@@ -24,10 +24,10 @@ public final class LifeSeries extends JavaPlugin {
     public void onEnable() {
         scoreboardManager = new ScoreboardManager();
         manager = new LivesManager(this, scoreboardManager);
-        sessionManager = new SessionManager();
+        sessionManager = new SessionManager(killManager, boogeymanManager, manager);
         boogeymanManager = new BoogeymanManager(manager, this, scoreboardManager);
 //        indirectKillManager = new IndirectKillManager(this);
-        killManager = new KillManager(boogeymanManager, manager, scoreboardManager);
+        killManager = new KillManager(boogeymanManager, manager);
 
         getServer().getPluginManager().registerEvents(new DeathManager(manager, scoreboardManager), this);
         getServer().getPluginManager().registerEvents(new JoinManager(manager, scoreboardManager, killManager), this);

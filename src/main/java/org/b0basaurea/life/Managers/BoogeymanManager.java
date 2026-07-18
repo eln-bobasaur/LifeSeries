@@ -52,7 +52,7 @@ public class BoogeymanManager  {
         ));
 
         // 4:00 - 1 minute warning
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        schedule(() -> {
             Bukkit.broadcast(Component.text(
                     "The Boogeyman will be chosen in 1 minute...",
                     NamedTextColor.RED
@@ -64,7 +64,7 @@ public class BoogeymanManager  {
         }, 4 * MINUTES);
 
         // 4:45 - almost time warning
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        schedule(() -> {
             Bukkit.broadcast(Component.text(
                     "The Boogeyman is about to be chosen...",
                     NamedTextColor.RED
@@ -72,14 +72,15 @@ public class BoogeymanManager  {
         }, 4 * MINUTES + 45 * SECONDS);
 
         // 4:57, 4:58, 4:59 - countdown
-        Bukkit.getScheduler().runTaskLater(plugin, () -> showCountdown(3), 4 * MINUTES + 55 * SECONDS);
-        Bukkit.getScheduler().runTaskLater(plugin, () -> showCountdown(2), 4 * MINUTES + 57 * SECONDS);
-        Bukkit.getScheduler().runTaskLater(plugin, () -> showCountdown(1), 4 * MINUTES + 59 * SECONDS);
+        schedule(() -> showCountdown(3), 4 * MINUTES + 55 * SECONDS);
+        schedule(() -> showCountdown(2), 4 * MINUTES + 57 * SECONDS);
+        schedule(() -> showCountdown(1), 4 * MINUTES + 59 * SECONDS);
 
         // 5:00 - reveal
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        schedule(() -> {
             chooseAndRevealBoogeyman();
             boogeyCountdownActive = false;
+            countdownTasks.clear();
         }, 5 * MINUTES);
     }
 
@@ -91,7 +92,6 @@ public class BoogeymanManager  {
         }
 
         livesManager.setLives(boogeyman, 1);
-        scoreboardManager.updatePlayerTeam(boogeyman, livesManager.getLives(boogeyman));
 
         boogeyman.sendMessage(Component.text(
                 "You failed to get your kill. You are now on red life...",
@@ -101,10 +101,12 @@ public class BoogeymanManager  {
         boogeyman = null;
     }
 
-    public void clearBoogeyman()
-    {
+    public void cureBoogeyman() {
+        if (boogeyman == null) {
+            return;
+        }
+
         boogeyman = null;
-        boogeyCountdownActive = false;
     }
 
     private void showCountdown(int seconds) {
@@ -163,7 +165,16 @@ public class BoogeymanManager  {
         players.removeIf(player -> livesManager.getLives(player) <= 1);
 
         if (players.isEmpty()) {
-            Bukkit.broadcast(Component.text("No valid players for Boogeyman selection.", NamedTextColor.RED));
+            Bukkit.broadcast(
+                    Component.text(
+                            "No valid players for Boogeyman selection.",
+                            NamedTextColor.RED
+                    )
+            );
+
+            boogeyman = null;
+            boogeyCountdownActive = false;
+            countdownTasks.clear();
             return;
         }
 
@@ -204,7 +215,7 @@ public class BoogeymanManager  {
             player.showTitle(suspenseTitle);
             player.playSound(player.getLocation(), Sound.ENTITY_WARDEN_HEARTBEAT, 1.5f, 0.7f);
 
-            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            schedule( () -> {
                 if (player.equals(boogeyman)) {
                     player.showTitle(boogeyTitle);
                     player.playSound(player.getLocation(), Sound.ENTITY_ELDER_GUARDIAN_CURSE, 1.0f, 1.0f);
@@ -242,5 +253,25 @@ public class BoogeymanManager  {
 
     public boolean hasActiveBoogeyman() {
         return boogeyman != null;
+    }
+
+    private void schedule(Runnable action, long delay) {
+        BukkitTask task =
+                Bukkit.getScheduler().runTaskLater(
+                        plugin,
+                        action,
+                        delay
+                );
+
+        countdownTasks.add(task);
+    }
+
+    private void cancelCountdown() {
+        for (BukkitTask task : countdownTasks) {
+            task.cancel();
+        }
+
+        countdownTasks.clear();
+        boogeyCountdownActive = false;
     }
 }
