@@ -39,6 +39,11 @@ public class KillManager implements Listener {
     public void onDeath(PlayerDeathEvent event)
     {
         Player killer = event.getPlayer().getKiller();
+        Player victim = event.getPlayer();
+
+        if (killer == null || killer.equals(victim)) {
+            return;
+        }
 
 //        if (killer == null) {
 //            killer = indirectKillManager.getIndirectKiller(event.getPlayer());
@@ -65,14 +70,29 @@ public class KillManager implements Listener {
         if(livesManager.getLives(killer) <= 1 && livesManager.getLives(event.getPlayer()) >= 2) //If red name, allow them to gain one life back after 2 kills. Resets every session
         {
             killer.sendMessage("Take " + (2 - kills.get(killer.getUniqueId())) + " lives and you'll get a life back...");
-            if(kills.get(killer.getUniqueId()) >= 2)
-            {
-                livesManager.addLives(killer, 1);
-                scoreboardManager.updatePlayerTeam(killer, livesManager.getLives(killer));
-                kills.put(killer.getUniqueId(), 0);
-            }
 
-            kills.put(killer.getUniqueId(), kills.get(killer.getUniqueId()) + 1);
+            UUID killerId = killer.getUniqueId();
+            int newKills = kills.getOrDefault(killerId, 0) + 1;
+            kills.put(killerId, newKills);
+
+            if (newKills >= 2) {
+                livesManager.addLives(killer, 1);
+                kills.put(killerId, 0);
+
+                killer.sendMessage(
+                        Component.text(
+                                "You earned a life back!",
+                                NamedTextColor.GREEN
+                        )
+                );
+            } else {
+                killer.sendMessage(
+                        Component.text(
+                                "Get 1 more qualifying kill to regain a life.",
+                                NamedTextColor.RED
+                        )
+                );
+            }
         }
     }
 

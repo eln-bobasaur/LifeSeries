@@ -7,6 +7,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ public class BoogeymanManager  {
 
     private boolean boogeyCountdownActive = false;
     private Player boogeyman;
+    private final List<BukkitTask> countdownTasks = new ArrayList<>();
 
     public BoogeymanManager(LivesManager livesManager, JavaPlugin plugin, ScoreboardManager scoreboardManager)
     {

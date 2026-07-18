@@ -1,6 +1,7 @@
 package org.b0basaurea.life.Commands;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.b0basaurea.life.LifeSeries;
 import org.b0basaurea.life.Managers.LivesManager;
 import org.b0basaurea.life.Managers.ScoreboardManager;
@@ -49,12 +50,12 @@ public class LivesCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if(command.getName().equalsIgnoreCase("givelife"))
+        if(command.getName().equalsIgnoreCase("gift"))
         {
             if(!(sender instanceof Player player))
                 return false;
 
-            if(target == sender) {
+            if(target.equals(player)) {
                 sender.sendMessage("You can't gift yourself a life, silly.");
                 return false;
             }
@@ -63,6 +64,16 @@ public class LivesCommand implements CommandExecutor, TabCompleter {
             {
                 sender.sendMessage(target.displayName() + " already has max lives.");
                 return false;
+            }
+
+            if (livesManager.getLives(player) <= 1) {
+                player.sendMessage(
+                        Component.text(
+                                "You cannot give away your final life.",
+                                NamedTextColor.RED
+                        )
+                );
+                return true;
             }
 
             livesManager.addLives(target, 1);
