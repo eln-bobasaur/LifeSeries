@@ -34,6 +34,6 @@ public class ActionBarManager {
                 );
             }
 
-        }, 0L, 20L);
+        }, 0L, 10L);
     }
 }

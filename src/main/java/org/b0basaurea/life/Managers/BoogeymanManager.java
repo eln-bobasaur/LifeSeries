@@ -8,6 +8,7 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.checkerframework.checker.fenum.qual.SwingElementOrientation;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ public class BoogeymanManager  {
         boogeyCountdownActive = true;
 
         Bukkit.broadcast(Component.text(
-                "The Boogeyman will be chosen in 5 minutes...",
+                "The Boogeyman will be chosen in about 5 minutes...",
                 NamedTextColor.RED
         ));
 
@@ -59,6 +60,7 @@ public class BoogeymanManager  {
             ));
 
             for (Player p : Bukkit.getOnlinePlayers()) {
+
                 p.playSound(p.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 1.0f, 1.0f);
             }
         }, 4 * MINUTES);
@@ -72,9 +74,9 @@ public class BoogeymanManager  {
         }, 4 * MINUTES + 45 * SECONDS);
 
         // 4:57, 4:58, 4:59 - countdown
-        schedule(() -> showCountdown(3), 4 * MINUTES + 55 * SECONDS);
-        schedule(() -> showCountdown(2), 4 * MINUTES + 57 * SECONDS);
-        schedule(() -> showCountdown(1), 4 * MINUTES + 59 * SECONDS);
+        schedule(() -> showCountdown(3), 4 * MINUTES + 55 * SECONDS); // 4 * SECONDS
+        schedule(() -> showCountdown(2), 4 * MINUTES + 57 * SECONDS); // 6 * SECONDS
+        schedule(() -> showCountdown(1), 4 * MINUTES + 59 * SECONDS); // 8 * SECONDS
 
         // 5:00 - reveal
         schedule(() -> {
@@ -98,13 +100,29 @@ public class BoogeymanManager  {
                 NamedTextColor.RED
         ));
 
+        cancelCountdown();
         boogeyman = null;
     }
 
     public void cureBoogeyman() {
-        if (boogeyman == null) {
+        if(boogeyman == null)
+        {
+            Bukkit.broadcast(Component.text("There is no active boogeyman.", NamedTextColor.RED));
             return;
         }
+
+        Title title = Title.title(
+                Component.text("You are cured!", NamedTextColor.GREEN),
+                Component.empty(),
+                Title.Times.times(
+                        Duration.ofMillis(500),
+                        Duration.ofSeconds(2),
+                        Duration.ofMillis(500)
+                )
+        );
+
+        boogeyman.showTitle(title);
+        cancelCountdown();
 
         boogeyman = null;
     }
@@ -123,9 +141,9 @@ public class BoogeymanManager  {
                 Component.text(seconds, color),
                 Component.empty(),
                 Title.Times.times(
-                        Duration.ofMillis(250),
-                        Duration.ofSeconds(2),
-                        Duration.ofMillis(250)
+                        Duration.ofMillis(200),
+                        Duration.ofMillis(1400),
+                        Duration.ofMillis(300)
                 )
         );
 
@@ -133,29 +151,6 @@ public class BoogeymanManager  {
             player.showTitle(title);
             player.playSound(player.getLocation(), Sound.BLOCK_DISPENSER_DISPENSE, 1.0f, 1.0f);
         }
-    }
-
-    public void boogeyDone()
-    {
-        if(boogeyman == null)
-        {
-            Bukkit.broadcast(Component.text("There is no active boogeyman.", NamedTextColor.RED));
-            return;
-        }
-
-        Title title = Title.title(
-                Component.text("You are cured!", NamedTextColor.GREEN),
-                Component.empty(),
-                Title.Times.times(
-                        Duration.ofMillis(500),
-                        Duration.ofSeconds(2),
-                        Duration.ofMillis(500)
-                )
-        );
-
-        boogeyman.showTitle(title);
-
-        boogeyman = null;
     }
 
     private void chooseAndRevealBoogeyman() {
@@ -225,7 +220,10 @@ public class BoogeymanManager  {
                             Component.text("You are ", NamedTextColor.GRAY)
                                     .append(Component.text("THE BOOGEYMAN", NamedTextColor.RED))
                                     .append(Component.text("! Your task is to get a kill on a ", NamedTextColor.GRAY))
+                                    .append(Component.text("purple", NamedTextColor.DARK_PURPLE))
+                                    .append(Component.text(", ", NamedTextColor.GRAY))
                                     .append(Component.text("green", NamedTextColor.GREEN))
+                                    .append(Component.text(",", NamedTextColor.GRAY))
                                     .append(Component.text(" or ", NamedTextColor.GRAY))
                                     .append(Component.text("yellow", NamedTextColor.YELLOW))
                                     .append(Component.text(" player by the end of the session. ", NamedTextColor.GRAY))

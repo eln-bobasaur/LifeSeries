@@ -61,6 +61,7 @@ public class SessionCommands implements CommandExecutor, TabCompleter {
                 }
 
                 sender.sendMessage("Session stopped.");
+                boogeymanManager.endBoogeyman();
             }
 
             case "boogey" -> {
@@ -81,7 +82,7 @@ public class SessionCommands implements CommandExecutor, TabCompleter {
                     }
 
                     case "done" -> {
-                        boogeymanManager.boogeyDone();
+                        boogeymanManager.cureBoogeyman();
                         sender.sendMessage("Boogeyman done.");
                     }
 
@@ -112,7 +113,7 @@ public class SessionCommands implements CommandExecutor, TabCompleter {
 
         if(args.length == 2 && args[0].equalsIgnoreCase("boogey"))
         {
-            return filter(List.of("start", "end", "clear"), args[1]);
+            return filter(List.of("start", "end", "clear", "done"), args[1]);
         }
 
         return List.of();

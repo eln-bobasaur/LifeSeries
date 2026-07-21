@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="LifeSeries:jar">
+    <output-path>$PROJECT_DIR$/../../ServerPrep</output-path>
+    <root id="archive" name="LifeSeries.jar">
+      <element id="module-output" name="LifeSeries.main" />
+      <element id="file-copy" path="$PROJECT_DIR$/src/main/resources/plugin.yml" />
+    </root>
+  </artifact>
+</component>

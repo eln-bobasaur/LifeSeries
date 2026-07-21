@@ -50,7 +50,7 @@ public class LivesCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (command.getName().equalsIgnoreCase("gift")) {
+        if (command.getName().equalsIgnoreCase("givelife")) {
             if (!(sender instanceof Player player)) {
                 sender.sendMessage(
                         ChatColor.RED + "Only players can give lives."
@@ -129,7 +129,7 @@ public class LivesCommand implements CommandExecutor, TabCompleter {
 
         if (command.getName().equalsIgnoreCase("addLives")) {
 
-            if(livesManager.getLives(target) >= 4 || livesManager.getLives(target) + amount >= 4)
+            if(livesManager.getLives(target) + amount > 4)
             {
                 sender.sendMessage(target.name().append(Component.text(" already has max lives")));
                 return false;
@@ -139,9 +139,9 @@ public class LivesCommand implements CommandExecutor, TabCompleter {
         }
 
         if (command.getName().equalsIgnoreCase("removeLives")) {
-            if(livesManager.getLives(target) <= 0 || livesManager.getLives(target) - amount <= 0)
+            if(livesManager.getLives(target) - amount <= 0)
             {
-                sender.sendMessage(target.name().append(Component.text(" already has <= 0 lives")));
+                sender.sendMessage(target.name().append(Component.text(" can not make someone have negative lives")));
                 return false;
             }
 
